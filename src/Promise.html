@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promise</title>
+</head>
+
+<body>
+    <script>
+        const PENDING = 'pending'
+        const FUFILLED = 'fulfilled'
+        const REJECTED = 'rejected'
+        // 1. executor 执行器函数
+        // 2. resolve:把promise变成成功态，reject:把promise变成失败态
+        // 3. value:记录成功的原因reason:失败的原因
+        // 4. promise?有三种状态：1.pending准备态2.fulfilled完成态3.rejected拒绝态
+        // 5. promise状态只能改变一次，pending->fulfilled pending->rejected不能完成态拒绝态相互转换
+        // 6. 当Promise在执行过程当中，任何错误都会导致Promise变成失败态
+        class Promise {
+            value
+            reason
+            status = PENDING
+            onFufilledCallbacks = []
+            onRejectedCallbacks = []
+
+            constructor(executor) {
+                const resolve = (value) => {
+                    if (this.status === PENDING) {
+                        this.value = value;
+                        this.status = FUFILLED
+                        this.onFufilledCallbacks.forEach(cb => cb())
+                    }
+                }
+                const reject = (reason) => {
+                    if (this.status === PENDING) {
+                        this.reason = reason;
+                        this.status = REJECTED
+                        this.onRejectedCallbacks.forEach(cb => cb());
+                    }
+                }
+
+                try {
+                    executor(resolve, reject)
+                } catch (error) {
+                    reject(error)
+                }
+
+
+            }
+            then(onFufilled, onRejected) {
+                if (this.status === FUFILLED) {
+                    onFufilled(this.value)
+                }
+                if (this.status === REJECTED) {
+                    onRejected(this.reason)
+                }
+                if (this.status === PENDING) {
+                    this.onFufilledCallbacks.push(() => {
+                        onFufilled(this.value)
+                    })
+                    this.onRejectedCallbacks.push(() => {
+                        onRejected(this.reason)
+                    })
+                }
+            }
+        }
+
+        const p = new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve('成功')
+                // reject('失败')
+            }, 3000)
+        })
+        p.then(
+            res => console.log('1', res),
+            err => console.log(err)
+        )
+        p.then(
+            res => console.log('2', res),
+            err => console.log(err)
+        )
+
+        // const p1 = new Promise(() => { }) //Pending
+        // const p2 = new Promise((resolve) => resolve()) // fulfilled
+        // const p3 = new Promise((resolve, reject) => reject()) // rejected
+
+        // console.log(
+        //     'p1', p1,
+        //     'p2', p2,
+        //     'p3', p3
+        // )
+    </script>
+</body>
+
+</html>
