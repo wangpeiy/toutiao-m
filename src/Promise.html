@@ -51,37 +51,55 @@
 
             }
             then(onFufilled, onRejected) {
-                if (this.status === FUFILLED) {
-                    onFufilled(this.value)
-                }
-                if (this.status === REJECTED) {
-                    onRejected(this.reason)
-                }
-                if (this.status === PENDING) {
-                    this.onFufilledCallbacks.push(() => {
-                        onFufilled(this.value)
-                    })
-                    this.onRejectedCallbacks.push(() => {
-                        onRejected(this.reason)
-                    })
-                }
+
+                const p2 = new Promise((resolve, reject) => {
+                    if (this.status === FUFILLED) {
+                        try {
+                            onFufilled(this.value)
+                        } catch (error) {
+                            reject(error)
+                        }
+                    }
+                    if (this.status === REJECTED) {
+                        try {
+                            onRejected(this.reason)
+                        } catch (error) {
+                            reject(error)
+                        }
+                    }
+                    if (this.status === PENDING) {
+                        this.onFufilledCallbacks.push(() => {
+                            try {
+                                onFufilled(this.value)
+                            } catch (error) {
+                                reject(error)
+                            }
+                        })
+                        this.onRejectedCallbacks.push(() => {
+                            try {
+                                onRejected(this.reason)
+                            } catch (error) {
+                                reject(error)
+                            }
+                        })
+                    }
+                })
+
+                return p2
             }
         }
 
         const p = new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve('成功')
-                // reject('失败')
-            }, 3000)
+            resolve('成功')
         })
         p.then(
-            res => console.log('1', res),
+            res => setTimeout(() => { console.log('1', a.a) }, 3000),
             err => console.log(err)
-        )
-        p.then(
+        ).then(
             res => console.log('2', res),
             err => console.log(err)
         )
+
 
         // const p1 = new Promise(() => { }) //Pending
         // const p2 = new Promise((resolve) => resolve()) // fulfilled
