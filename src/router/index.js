@@ -37,9 +37,12 @@ const routes = [
     // 可以使用路由懒加载
     //  - 使用到了路由再去加载
     component: () => import('views/Login')
+  },
+  {
+    path: '/search',
+    component: () => import(/* webpackChunkName:'Search' */ 'views/Search')
   }
 ]
-
 const router = new VueRouter({
   routes
 })
